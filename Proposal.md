@@ -29,10 +29,3 @@ A mechanical hand that can form rock-paper scissors gestures and recognize those
 ### Useful Links:
 * [C Library for Camera](http://docs.opencv.org/3.3.0/dd/d01/group__videoio__c.html#gae38819ff8d6fa81e72c1ee032aa86284)
 * [Inspiration for our idea](http://www.k2.t.u-tokyo.ac.jp/fusion/Janken/index-e.html)
-* https://www.youtube.com/watch?v=bSeFrPrqZ2A
-* http://rpi.science.uoit.ca/lab/servo/
-
-
-
-
- 
