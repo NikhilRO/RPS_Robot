@@ -1,4 +1,4 @@
-import gab.opencv.*; //<>// //<>//
+import gab.opencv.*;  //<>//
 import processing.video.*;
 import java.awt.*;
 
@@ -18,8 +18,6 @@ void setup() {
   size(640, 480);
   video = new Capture(this, 640/4, 480/4);
   opencv = new OpenCV(this, 640/4, 480/4);
-
-  //opencv.startBackgroundSubtraction(5, 3, 0.5);
 
   video.start();
 }
@@ -52,7 +50,6 @@ void draw() {
   } else if (max < 14){ println("rock");
   } else { println("paper"); }
   max=0;
-  
 }
 
 void captureEvent(Capture c) {
