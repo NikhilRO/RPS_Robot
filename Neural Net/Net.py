@@ -83,7 +83,8 @@ class Net:
             # self.biases.append([0 for _ in range(layer_sizes[x])])
             # self.weights.append([[0 for _ in range(layer_sizes[x - 1])] for __ in range(layer_sizes[x])])
             self.__biases.append([random.uniform(-2, 2) for _ in range(layer_sizes[x])])
-            self.__weights.append([[random.uniform(-2, 2) for _ in range(layer_sizes[x-1])] for __ in range (layer_sizes[x])])
+            self.__weights.append([[random.uniform(-2, 2) for _ in range(layer_sizes[x-1])]
+                                   for __ in range (layer_sizes[x])])
 
     # Returns all weights leading out of a neuron
     def __exiting_weights(self, layer, neuron):
@@ -134,14 +135,18 @@ class Net:
         # Gradient of biases are a 2D array and weights are a 3D array
         # Gradient of biases is a 2D array b[l][n] storing the bias of layer l-1 and neuron n-1
         grad_b = [0 for l in range(1, self.__n_layers)]
-        # Gradient of weights is a 3D array w[l][n][p] storing the weight connecting neuron p-1 on layer l-1 to neuron n-1 on layer l
+        # Gradient of weights is a 3D array w[l][n][p] storing the weight
+        #   connecting neuron p-1 on layer l-1 to neuron n-1 on layer l
         grad_w = [[0 for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
 
         # Initial error hadamard(d_cost, sig_prime)
-        error = hadamard_prod(self.__cost_derivative(activation_vecs[self.__n_layers-1], expected), activation_vecs_prime[self.__n_layers-1])
+        error = hadamard_prod(self.__cost_derivative(activation_vecs[self.__n_layers-1], expected),
+                              activation_vecs_prime[self.__n_layers-1])
+
         grad_b[self.__n_layers-2] = error
         for n in range(self.__layer_sizes[self.__n_layers-1]):
-            grad_w[self.__n_layers-2][n] = [error[n]*activation_vecs[self.__n_layers-2][x] for x in range(self.__layer_sizes[self.__n_layers-2])]
+            grad_w[self.__n_layers-2][n] = [error[n]*activation_vecs[self.__n_layers-2][x]
+                                            for x in range(self.__layer_sizes[self.__n_layers-2])]
 
         for l in reversed(range(1, self.__n_layers-1)):
             ex_w = []
@@ -156,15 +161,20 @@ class Net:
     # Updates networks weights and biases based on gradients
     def __update_net_weights_biases (self, mini_batch, step_size):
         grad_b = [[0 for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
-        grad_w = [[[0 for p in range(self.__layer_sizes[l-1])] for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
+        grad_w = [[[0 for p in range(self.__layer_sizes[l-1])]
+                   for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
 
         for i, o in mini_batch:
             d_grad_b, d_grad_w = self.__back_prop(i, o)
             grad_b = [add_vec(1, 1, grad_b[a], d_grad_b[a]) for a in range(self.__n_layers-1)]
-            grad_w = [[add_vec(1, 1, grad_w[a-1][b], d_grad_w[a-1][b]) for b in range(self.__layer_sizes[a])] for a in range(1, self.__n_layers)]
+            grad_w = [[add_vec(1, 1, grad_w[a-1][b], d_grad_w[a-1][b])
+                       for b in range(self.__layer_sizes[a])] for a in range(1, self.__n_layers)]
+
         avg_step = (step_size+0.0)/len(mini_batch)
+
         self.__biases = [add_vec(1, -avg_step, self.__biases[a], grad_b[a]) for a in range(self.__n_layers-1)]
-        self.__weights = [[add_vec(1, -avg_step, self.__weights[a][b], grad_w[a][b]) for b in range(self.__layer_sizes[a+1])] for a in range(self.__n_layers-1)]
+        self.__weights = [[add_vec(1, -avg_step, self.__weights[a][b], grad_w[a][b])
+                           for b in range(self.__layer_sizes[a+1])] for a in range(self.__n_layers-1)]
 
     # Returns fraction correct by testing it against the neural net
     def evaluate(self, test_data):
@@ -198,7 +208,8 @@ class Net:
         return correct / n_tests;
 
     # Performs SGD to network
-    def stochastic_gradient_descent(self, epochs, mini_batch_size, training_inputs, expected_outputs, step_size, test_input=None, test_output=None):
+    def stochastic_gradient_descent(self, epochs, mini_batch_size, training_inputs, expected_outputs,
+                                    step_size, test_input=None, test_output=None):
         training_data = []
         for t in range(len(training_inputs)):
             training_data.append([training_inputs[t], expected_outputs[t]])
@@ -212,7 +223,8 @@ class Net:
 
         for iters in range(epochs):
             random.shuffle(training_data)
-            mini_batches = [training_data[curr:curr+mini_batch_size] for curr in range(0, len(training_data), mini_batch_size)]
+            mini_batches = [training_data[curr:curr+mini_batch_size] for curr in
+                            range(0, len(training_data), mini_batch_size)]
             for batch in mini_batches:
                 self.__update_net_weights_biases(batch, step_size)
 

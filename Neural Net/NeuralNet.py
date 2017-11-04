@@ -6,8 +6,10 @@ def new_net (layer_sizes):
 
 # Pass through neural network (net), epochs (number of training loops), training inputs (list of inputs (1D arrays))
 #   expected outputs (list of expected outputs), step size, validation data (as a list of 2-tuples, (training inputs, expected outputs))
-def train_net(net, epochs, mini_batch_size, training_inputs, expected_outputs, step_size, validation_data=None):
-    net.stochastic_gradient_descent(epochs, mini_batch_size, training_inputs, expected_outputs, step_size, validation_data)
+def train_net(net, epochs, mini_batch_size, training_inputs, expected_outputs, step_size, test_input=None, test_output=None):
+    if not net:
+        return
+    net.stochastic_gradient_descent(epochs, mini_batch_size, training_inputs, expected_outputs, step_size, test_input, test_output)
 
 # Returns the index of the output given an input
 # eg: if out_from_net = [0.11, 0.2, 0.9]
