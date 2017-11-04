@@ -8,13 +8,15 @@ def new_net (layer_sizes):
 #   expected outputs (list of expected outputs), step size, validation data (as a list of 2-tuples, (training inputs, expected outputs))
 def train_net(net, epochs, mini_batch_size, training_inputs, expected_outputs, step_size, test_input=None, test_output=None):
     if not net:
-        return
+        return 0
     net.stochastic_gradient_descent(epochs, mini_batch_size, training_inputs, expected_outputs, step_size, test_input, test_output)
 
 # Returns the index of the output given an input
 # eg: if out_from_net = [0.11, 0.2, 0.9]
 # method returns: ind = 2
 def get_output (net, input):
+    if not net:
+        return 0
     out = net.feed_forward(input)
     ind = 0
     max = out[0]
@@ -26,10 +28,14 @@ def get_output (net, input):
 
 # Returns the weights in the network (3D array)
 def get_weights(net):
+    if not net:
+        return 0
     return net.get_weights()
 
 # Returns the biases in the network (2D array)
 def get_biases(net):
+    if not net:
+        return 0
     return net.get_biases()
 
 
