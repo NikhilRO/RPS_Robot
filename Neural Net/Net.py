@@ -1,6 +1,7 @@
 import random
 import math
 import Functions
+import numpy
 
 # -- The following methods are mathematical methods used by the neural network
 
@@ -18,14 +19,19 @@ class Net:
         # Weights is a 3D array w[x][y][z] where x is the layer number, y is the neuron on layer x, and z is the weight
         # connecting neuron z on layer x-1 to neuron y in layer x
         self.__weights = []
-        for x in range(1, self.__n_layers):
-            #self.__biases.append([0 for _ in range(layer_sizes[x])])
-            #self.__weights.append([[0 for _ in range(layer_sizes[x - 1])] for __ in range(layer_sizes[x])])
-            self.__biases.append([random.uniform(-10, 10) for _ in range(layer_sizes[x])])
-            self.__weights.append([[random.uniform(-10, 10) for _ in range(layer_sizes[x-1])]
-                                   for __ in range (layer_sizes[x])])
+
+        # Define cost function
         self.__cost = cost
+
+        # Define logistic function
         self.__logistic_func = logistic_func
+        # Initialize biases by Gaussian/Normal distribution with mean = 0 and std_dev = 1
+        # Initialize weights by Gaussian/Normal distribution with mean = 0 and std_dev = 1/sqrt(layer_size)
+        for x in range(1, self.__n_layers):
+            standard_dev = 1/math.sqrt(layer_sizes[x])
+            self.__biases.append([numpy.random.normal(0, 1) for _ in range(layer_sizes[x])])
+            self.__weights.append([[numpy.random.normal(0, standard_dev) for _ in range(layer_sizes[x-1])]
+                                   for __ in range(layer_sizes[x])])
 
     # Returns all weights leading out of a neuron
     def __exiting_weights(self, layer, neuron):
@@ -190,9 +196,10 @@ class Net:
                 print("Epoch", iters+1, " percent correct", self.evaluate(test_data))
             else:
                 print("Epoch", iters+1, " percent correct", self.evaluate(mini_batches[0]))
+            # print (self.__weights[0][0])
             # if iters%10 == 0:
             #     print (self.__weights[0][0])
-            # if iters+1 == epochs:
+            # if iters%10 == 0:
             #     print (arr_round(self.feed_forward([1,1,1]), 2)) #out 0
             #     print (arr_round(self.feed_forward([0,0,0]), 2)) #out 1
             #     print (arr_round(self.feed_forward([0,0,1]), 2)) #out 2
@@ -221,7 +228,7 @@ class Net:
 # testtt = [[[0,0,0],[0,1,0,0,0,0,0,0]],[[0,0,1],[0,0,1,0,0,0,0,0]],[[0,1,0],[0,0,0,1,0,0,0,0]],[[0,1,1],[0,0,0,0,1,0,0,0]],
 #           [[1,0,0],[0,0,0,0,0,1,0,0]],[[1,0,1],[0,0,0,0,0,0,1,0]],[[1,1,0],[0,0,0,0,0,0,0,1]],[[1,1,1],[1,0,0,0,0,0,0,0]]]
 #
-# net = Net([3,20,20,8])
+# net = Net([3,30,30,8])
 # step_size = 1
 # lmbda = 0.1
 # input = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
@@ -233,7 +240,7 @@ class Net:
 #     expectedResults = []
 #
 #     for a in range(1000):
-#         r = a%8
+#         r = random.randint(0, 7)
 #         testData.append(input[r])
 #         expectedResults.append(output[r])
 #
