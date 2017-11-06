@@ -37,6 +37,14 @@ def hadamard_prod (vec_a, vec_b):
         vec.append(a*b)
     return vec
 
+# Returns -1 if number is negative, 1 if positive, 0 if 0
+def sign (num):
+    if num < 0:
+        return -1
+    elif num > 0:
+        return 1
+    return 0
+
 # -- Class defining the sigmoid activation function
 class Sigmoid:
     @staticmethod
@@ -118,6 +126,18 @@ class QuadraticCost:
             sum += (e-o)*(e-o)
         return sum/(2*len(outs))
 
+    # Returns the cost for given network with L2 regularization
+    @staticmethod
+    def cost_with_L2_regularization(outs, expected, weights, lmbda, training_set_size):
+        sum = QuadraticCost.cost(outs, expected)
+        regularization_term = 0
+        for l1 in weights:
+            for l2 in l1:
+                for l3 in l2:
+                    regularization_term += l3*l3
+        regularization_term *= lmbda/(2*training_set_size)
+        return sum + regularization_term
+
     # Returns the error vector for the output layer by d = (a-y)*sig_p(z)
     @staticmethod
     def delta(out, exp, z):
@@ -132,6 +152,18 @@ class CrossEntropy:
         for o, e in zip(outs, expected):
             sum += e*math.log(o) + (1-e)*math.log(1-o)
         return sum/len(outs)
+
+    # Returns the cost with L2 regularization
+    @staticmethod
+    def cost_with_L2_regularization(outs, expected, weights, lmbda, training_set_size):
+        sum = CrossEntropy.cost(outs, expected)
+        regularization_term = 0
+        for l1 in weights:
+            for l2 in l1:
+                for l3 in l2:
+                    regularization_term += l3 * l3
+        regularization_term *= lmbda / (2 * training_set_size)
+        return sum + regularization_term
 
     # Returns the error vector for the output layer by d = a-y
     @staticmethod
