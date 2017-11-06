@@ -96,8 +96,8 @@ class Net:
                 grad_w[l-1][n] = [error[n] * activation_vecs[l-1][x] for x in range(self.__layer_sizes[l-1])]
         return grad_b, grad_w
 
-    # Updates networks weights and biases based on gradients
-    def __update_net_weights_biases (self, mini_batch, step_size):
+    # Updates networks weights and biases based on gradients, lambda, and size of training set through regulation
+    def __update_net_weights_biases (self, mini_batch, step_size, lmbda, training_set_size):
         grad_b = [[0 for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
         grad_w = [[[0 for p in range(self.__layer_sizes[l-1])]
                    for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
@@ -111,7 +111,7 @@ class Net:
         avg_step = (step_size+0.0)/len(mini_batch)
 
         self.__biases = [Functions.add_vec(1, -avg_step, self.__biases[a], grad_b[a]) for a in range(self.__n_layers-1)]
-        self.__weights = [[Functions.add_vec(1, -avg_step, self.__weights[a][b], grad_w[a][b])
+        self.__weights = [[Functions.add_vec((1-(step_size*lmbda/training_set_size)), -avg_step, self.__weights[a][b], grad_w[a][b])
                            for b in range(self.__layer_sizes[a+1])] for a in range(self.__n_layers-1)]
 
     # Returns fraction correct by testing it against the neural net
@@ -147,7 +147,8 @@ class Net:
 
     # Performs SGD to network
     def stochastic_gradient_descent(self, epochs, mini_batch_size, training_inputs, expected_outputs,
-                                    step_size, test_input=None, test_output=None):
+                                    step_size, lmbda, test_input=None, test_output=None):
+        training_set_size = len(training_inputs)
         training_data = []
         for t in range(len(training_inputs)):
             training_data.append([training_inputs[t], expected_outputs[t]])
@@ -164,7 +165,7 @@ class Net:
             mini_batches = [training_data[curr:curr+mini_batch_size] for curr in
                             range(0, len(training_data), mini_batch_size)]
             for batch in mini_batches:
-                self.__update_net_weights_biases(batch, step_size)
+                self.__update_net_weights_biases(batch, step_size, lmbda, training_set_size)
 
             if test_input:
                 print("Epoch", iters+1, " percent correct", self.evaluate(test_data))
@@ -179,14 +180,14 @@ class Net:
             #     print (arr_round(self.feed_forward([1,0,0]), 2)) #out 5
             #     print (arr_round(self.feed_forward([1,0,1]), 2)) #out 6
             #     print (arr_round(self.feed_forward([1,1,0]), 2)) #out 7
-            # print (arr_round(self.feed_forward([1, 1, 1]), 15))  # out 0
-            # print (arr_round(self.feed_forward([0, 0, 0]), 15))  # out 1
-            # print (arr_round(self.feed_forward([0, 0, 1]), 15))  # out 2
-            # print (arr_round(self.feed_forward([0, 1, 0]), 15))  # out 3
-            # print (arr_round(self.feed_forward([0, 1, 1]), 15))  # out 4
-            # print (arr_round(self.feed_forward([1, 0, 0]), 15))  # out 5
-            # print (arr_round(self.feed_forward([1, 0, 1]), 15))  # out 6
-            # print (arr_round(self.feed_forward([1, 1, 0]), 15))  # out 7
+            print (arr_round(self.feed_forward([1, 1, 1]), 15))  # out 0
+            print (arr_round(self.feed_forward([0, 0, 0]), 15))  # out 1
+            print (arr_round(self.feed_forward([0, 0, 1]), 15))  # out 2
+            print (arr_round(self.feed_forward([0, 1, 0]), 15))  # out 3
+            print (arr_round(self.feed_forward([0, 1, 1]), 15))  # out 4
+            print (arr_round(self.feed_forward([1, 0, 0]), 15))  # out 5
+            print (arr_round(self.feed_forward([1, 0, 1]), 15))  # out 6
+            print (arr_round(self.feed_forward([1, 1, 0]), 15))  # out 7
 
     # Returns all weights in the neural network (3D Array)
     def get_weights(self):
@@ -217,24 +218,24 @@ class Net:
         # for x in range(self.n_layers):
         #     print("w {0}, b {1}", self.weights[x], self.biases[x])
 
-#
-# testtt = [[[0,0,0],[0,1,0,0,0,0,0,0]],[[0,0,1],[0,0,1,0,0,0,0,0]],[[0,1,0],[0,0,0,1,0,0,0,0]],[[0,1,1],[0,0,0,0,1,0,0,0]],
-#           [[1,0,0],[0,0,0,0,0,1,0,0]],[[1,0,1],[0,0,0,0,0,0,1,0]],[[1,1,0],[0,0,0,0,0,0,0,1]],[[1,1,1],[1,0,0,0,0,0,0,0]]]
-#
-# net = Net([3,20,20,8])
-# step_size = 3
-# input = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
-# output = [[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0]
-# ,[0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0]]
-#
-# for a in range(10000):
-#     testData = []
-#     expectedResults = []
-#
-#     for a in range(1000):
-#         r = a%8
-#         testData.append(input[r])
-#         expectedResults.append(output[r])
-#
-#     #print (net.feed_forward(input[0]))
-#     net.stochastic_gradient_descent(100, 100, testData, expectedResults, step_size, input, output)
+testtt = [[[0,0,0],[0,1,0,0,0,0,0,0]],[[0,0,1],[0,0,1,0,0,0,0,0]],[[0,1,0],[0,0,0,1,0,0,0,0]],[[0,1,1],[0,0,0,0,1,0,0,0]],
+          [[1,0,0],[0,0,0,0,0,1,0,0]],[[1,0,1],[0,0,0,0,0,0,1,0]],[[1,1,0],[0,0,0,0,0,0,0,1]],[[1,1,1],[1,0,0,0,0,0,0,0]]]
+
+net = Net([3,20,20,8])
+step_size = 1
+lmbda = 0.1
+input = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
+output = [[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0]
+,[0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0]]
+
+for a in range(10000):
+    testData = []
+    expectedResults = []
+
+    for a in range(1000):
+        r = a%8
+        testData.append(input[r])
+        expectedResults.append(output[r])
+
+    #print (net.feed_forward(input[0]))
+    net.stochastic_gradient_descent(100, 100, testData, expectedResults, step_size, lmbda, input, output)
