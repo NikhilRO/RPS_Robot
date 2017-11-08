@@ -225,10 +225,33 @@ class Net:
     def get_biases(self):
         return self.__biases
 
+    def set_weights_biases (self, weights, biases):
+        if not len(weights) == len(biases):
+            return "failed"
+        n_layers = len(weights)
+        layer_sizes = []
+        layer_sizes.append(len(weights[0][0]))
+        for w in weights[0]:
+            if not len(w) == layer_sizes[0]:
+                return "failed"
+        for l, b, n in zip(weights, biases, range(0, n_layers-1)):
+            if len(l) == len(b):
+                layer_sizes.append(len(b))
+                for w in l:
+                    if not len(w) == layer_sizes[n]:
+                        return "failed"
+            else:
+                return "failed"
+        self.__n_layers = n_layers
+        self.__weights = weights
+        self.__biases = biases
+        self.__layer_sizes = layer_sizes
+        return layer_sizes
+#
 # testtt = [[[0,0,0],[0,1,0,0,0,0,0,0]],[[0,0,1],[0,0,1,0,0,0,0,0]],[[0,1,0],[0,0,0,1,0,0,0,0]],[[0,1,1],[0,0,0,0,1,0,0,0]],
 #           [[1,0,0],[0,0,0,0,0,1,0,0]],[[1,0,1],[0,0,0,0,0,0,1,0]],[[1,1,0],[0,0,0,0,0,0,0,1]],[[1,1,1],[1,0,0,0,0,0,0,0]]]
 #
-# net = Net([3,30,30,8])
+# net = Net([3,80,80,8])
 # step_size = 1
 # lmbda = 0.1
 # input = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]

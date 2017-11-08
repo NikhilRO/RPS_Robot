@@ -12,6 +12,11 @@ def train_net(net, epochs, mini_batch_size, training_inputs, expected_outputs, s
         return 0
     net.stochastic_gradient_descent(epochs, mini_batch_size, training_inputs, expected_outputs, step_size, lmbda, test_input, test_output)
 
+# Sets networks weights (3D arr) and biases (2D arr)
+#   Returns "failed" if arrays are invalid and returns layer_sizes if passed
+def set_network_weights_biases (net, weights, biases):
+    return net.set_weights_biases(weights, biases)
+
 # Returns the index of the output given an input
 # eg: if out_from_net = [0.11, 0.2, 0.9]
 # method returns: ind = 2
