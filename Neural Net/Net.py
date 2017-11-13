@@ -3,12 +3,6 @@ import math
 import Functions
 import numpy
 
-# -- The following methods are mathematical methods used by the neural network
-
-# Returns array rounded to n decimals
-def arr_round (arr, decimals):
-    return [round(e, decimals) for e in arr]
-
 # -- Class for the neural network
 class Net:
     def __init__(self, layer_sizes, cost=Functions.CrossEntropy, logistic_func=Functions.Sigmoid):
@@ -196,26 +190,6 @@ class Net:
                 print("Epoch", iters+1, " percent correct", self.evaluate(test_data))
             else:
                 print("Epoch", iters+1, " percent correct", self.evaluate(mini_batches[0]))
-            # print (self.__weights[0][0])
-            # if iters%10 == 0:
-            #     print (self.__weights[0][0])
-            # if iters%10 == 0:
-            #     print (arr_round(self.feed_forward([1,1,1]), 2)) #out 0
-            #     print (arr_round(self.feed_forward([0,0,0]), 2)) #out 1
-            #     print (arr_round(self.feed_forward([0,0,1]), 2)) #out 2
-            #     print (arr_round(self.feed_forward([0,1,0]), 2)) #out 3
-            #     print (arr_round(self.feed_forward([0,1,1]), 2)) #out 4
-            #     print (arr_round(self.feed_forward([1,0,0]), 2)) #out 5
-            #     print (arr_round(self.feed_forward([1,0,1]), 2)) #out 6
-            #     print (arr_round(self.feed_forward([1,1,0]), 2)) #out 7
-            # print (arr_round(self.feed_forward([1, 1, 1]), 2))  # out 0
-            # print (arr_round(self.feed_forward([0, 0, 0]), 2))  # out 1
-            # print (arr_round(self.feed_forward([0, 0, 1]), 2))  # out 2
-            # print (arr_round(self.feed_forward([0, 1, 0]), 2))  # out 3
-            # print (arr_round(self.feed_forward([0, 1, 1]), 2))  # out 4
-            # print (arr_round(self.feed_forward([1, 0, 0]), 2))  # out 5
-            # print (arr_round(self.feed_forward([1, 0, 1]), 2))  # out 6
-            # print (arr_round(self.feed_forward([1, 1, 0]), 2))  # out 7
 
     # Returns all weights in the neural network (3D Array)
     def get_weights(self):
@@ -247,25 +221,3 @@ class Net:
         self.__biases = biases
         self.__layer_sizes = layer_sizes
         return layer_sizes
-#
-# testtt = [[[0,0,0],[0,1,0,0,0,0,0,0]],[[0,0,1],[0,0,1,0,0,0,0,0]],[[0,1,0],[0,0,0,1,0,0,0,0]],[[0,1,1],[0,0,0,0,1,0,0,0]],
-#           [[1,0,0],[0,0,0,0,0,1,0,0]],[[1,0,1],[0,0,0,0,0,0,1,0]],[[1,1,0],[0,0,0,0,0,0,0,1]],[[1,1,1],[1,0,0,0,0,0,0,0]]]
-#
-# net = Net([3,80,80,8])
-# step_size = 1
-# lmbda = 0.1
-# input = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]]
-# output = [[0,1,0,0,0,0,0,0],[0,0,1,0,0,0,0,0],[0,0,0,1,0,0,0,0],[0,0,0,0,1,0,0,0],[0,0,0,0,0,1,0,0],[0,0,0,0,0,0,1,0]
-# ,[0,0,0,0,0,0,0,1],[1,0,0,0,0,0,0,0]]
-#
-# for a in range(10000):
-#     testData = []
-#     expectedResults = []
-#
-#     for a in range(1000):
-#         r = random.randint(0, 7)
-#         testData.append(input[r])
-#         expectedResults.append(output[r])
-#
-#     #print (net.feed_forward(input[0]))
-#     net.stochastic_gradient_descent(100, 100, testData, expectedResults, step_size, lmbda, input, output)

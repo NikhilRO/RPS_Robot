@@ -43,9 +43,3 @@ def get_biases(net):
     if not net:
         return 0
     return net.get_biases()
-
-
-#EXAMPLE:
-net = new_net([200, 4, 5, 10]) # Makes new neural network with 200 inputs, 10 outputs, and 2 hidden layers
-
-# Notes: step size around 3 is good, mini batch size at least 50-100
