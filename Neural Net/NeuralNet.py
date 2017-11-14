@@ -1,5 +1,4 @@
 import Net as neuralnet
-import Image
 
 # Pass through 1D array layer_sizes, where first index is size of input and last is size of output
 def new_net (layer_sizes):
@@ -12,8 +11,6 @@ def train_net(net, epochs, mini_batch_size, training_inputs, expected_outputs, s
         return 0
     net.stochastic_gradient_descent(epochs, mini_batch_size, training_inputs, expected_outputs, step_size, lmbda, test_input, test_output)
 
-# Sets networks weights (3D arr) and biases (2D arr)
-#   Returns "failed" if arrays are invalid and returns layer_sizes if passed
 def set_network_weights_biases (net, weights, biases):
     return net.set_weights_biases(weights, biases)
 
@@ -24,9 +21,10 @@ def get_output (net, input):
     if not net:
         return 0
     out = net.feed_forward(input)
+    print(out)
     ind = 0
     max = out[0]
-    for x in range(1, len(out)):
+    for x in range(0, len(out)):
         if out[x] > max:
             ind = x
             max = out[x]

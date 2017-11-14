@@ -199,10 +199,13 @@ class Net:
     def get_biases(self):
         return self.__biases
 
+    def get_layer_sizes(self):
+        return self.__layer_sizes
+
     def set_weights_biases (self, weights, biases):
         if not len(weights) == len(biases):
             return "failed"
-        n_layers = len(weights)
+        n_layers = len(weights) + 1
         layer_sizes = []
         layer_sizes.append(len(weights[0][0]))
         for w in weights[0]:
