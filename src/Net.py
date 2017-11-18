@@ -1,61 +1,38 @@
 import random
 import math
 import Functions
-import numpy
+import numpy as np
 
 # -- Class for the neural network
 class Net:
     def __init__(self, layer_sizes, cost=Functions.CrossEntropy, logistic_func=Functions.Sigmoid):
         self.__layer_sizes = layer_sizes
         self.__n_layers = len(layer_sizes)
-        # Biases is a 2D array with each layers biases. The input and output layer have no biases
-        self.__biases = []
-        # Weights is a 3D array w[x][y][z] where x is the layer number, y is the neuron on layer x, and z is the weight
-        # connecting neuron z on layer x-1 to neuron y in layer x
-        self.__weights = []
 
         # Define cost function
         self.__cost = cost
 
         # Define logistic function
         self.__logistic_func = logistic_func
+
         # Initialize biases by Gaussian/Normal distribution with mean = 0 and std_dev = 1
         # Initialize weights by Gaussian/Normal distribution with mean = 0 and std_dev = 1/sqrt(layer_size)
-        for x in range(1, self.__n_layers):
-            standard_dev = 1/math.sqrt(layer_sizes[x])
-            self.__biases.append([numpy.random.normal(0, 1) for _ in range(layer_sizes[x])])
-            self.__weights.append([[numpy.random.normal(0, standard_dev) for _ in range(layer_sizes[x-1])]
-                                   for __ in range(layer_sizes[x])])
 
-    # Returns all weights leading out of a neuron
-    def __exiting_weights(self, layer, neuron):
-        if layer >= self.__n_layers:
-            return 0
-        w = []
-        for x in range(self.__layer_sizes[layer+1]):
-            w.append(self.__weights[layer][x][neuron])
-        return w
+        # Biases is a 2D array with each layers biases. The input and output layer have no biases
+        self.__biases = [np.random.randn(l) for l in layer_sizes[1:]]
+        # Weights is a 3D array w[x][y][z] where x is the layer number, y is the neuron on layer x, and z is the weight
+        # connecting neuron z on layer x-1 to neuron y in layer x
+        self.__weights = [np.random.randn(cl, pl)/np.sqrt(cl) for pl, cl in zip(self.__layer_sizes[:self.__n_layers-1], self.__layer_sizes[1:])]
 
     # Returns next activation, the z value
     def __next_activation(self, curr_activations, curr_layer):
-        w = self.__weights[curr_layer]
-
-        next_layer = []
-        for cw, b in zip(w, self.__biases[curr_layer]):
-            next_layer.append(Functions.dot_prod(cw, curr_activations) + b)
-        return next_layer
+        return np.dot(self.__weights[curr_layer], curr_activations) + self.__biases[curr_layer]
 
     # Returns output of neural net given an input
     def feed_forward (self, input_layer):
         for l in range(0, self.__n_layers-1):
-            input_layer = self.__logistic_func.func_vec(self.__next_activation(input_layer, l))
+            input_layer = self.__logistic_func.func(self.__next_activation(input_layer, l))
         return input_layer
-
-    # Returns the next error/delta value for layer l-1 (calculated by hadamardprod(a-transpose*error, sig-prime)
-    def __prev_error(self, error, exiting_weights, activation_vec_prime, layer):
-        error = [Functions.dot_prod(exiting_weights[n], error) for n in range(self.__layer_sizes[layer])]
-        error = Functions.hadamard_prod(error, activation_vec_prime)
-        return error
 
     # Returns nabla_b and nabla_w, gradients of biases and weights by back propagation
     # Error (l) = hadamard(weights_transpose(l+1)*error(l+1), sig_prime(activations(l))
@@ -64,59 +41,49 @@ class Net:
         z_s = [data]
         # 2D arrays storing activations of each neuron on each layer
         activation_vecs = [data]
-        activation_vecs_prime = [[0 for _ in range(self.__layer_sizes[0])]]
+        activation_vecs_prime = [np.zeros(self.__layer_sizes[0])]
         for l in range(0, self.__n_layers-1):
             z = self.__next_activation(z, l)
             z_s.append(z)
-            activation_vecs.append(self.__logistic_func.func_vec(z))
-            activation_vecs_prime.append(self.__logistic_func.func_prime_vec(z))
-            z = self.__logistic_func.func_vec(z)
+            activation_vecs.append(self.__logistic_func.func(z))
+            activation_vecs_prime.append(self.__logistic_func.func_deriv(z))
+            z = self.__logistic_func.func(z)
         # Gradient of biases are a 2D array and weights are a 3D array
         # Gradient of biases is a 2D array b[l][n] storing the bias of layer l-1 and neuron n-1
-        grad_b = [0 for l in range(1, self.__n_layers)]
+        grad_b = [np.zeros(b.shape) for b in self.__biases]
         # Gradient of weights is a 3D array w[l][n][p] storing the weight
         #   connecting neuron p-1 on layer l-1 to neuron n-1 on layer l
-        grad_w = [[0 for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
+        grad_w = [np.zeros(w.shape) for w in self.__weights]
 
         # Initial error hadamard(d_cost, sig_prime)
         error = self.__cost.delta(activation_vecs[self.__n_layers-1], expected, z_s[self.__n_layers-1])
 
         grad_b[self.__n_layers-2] = error
-        for n in range(self.__layer_sizes[self.__n_layers-1]):
-            grad_w[self.__n_layers-2][n] = [error[n]*activation_vecs[self.__n_layers-2][x]
-                                            for x in range(self.__layer_sizes[self.__n_layers-2])]
+        grad_w[self.__n_layers-2] = np.dot(np.array([error]).transpose(), np.array([activation_vecs[self.__n_layers-2]]))
 
         for l in reversed(range(1, self.__n_layers-1)):
-            ex_w = []
-            for n in range (self.__layer_sizes[l]):
-                ex_w.append(self.__exiting_weights(l, n))
-            error = self.__prev_error(error, ex_w, activation_vecs_prime[l], l)
+            error = np.dot(self.__weights[l].transpose(), error)*activation_vecs_prime[l]
             grad_b[l-1] = error
-            for n in range(self.__layer_sizes[l]):
-                grad_w[l-1][n] = [error[n] * activation_vecs[l-1][x] for x in range(self.__layer_sizes[l-1])]
+            grad_w[l-1] = np.dot(np.array([error]).transpose(), np.array([activation_vecs[l-1]]))
         return grad_b, grad_w
 
     # Updates networks weights and biases based on gradients, lambda, and size of training set through regularization
     def __update_net_weights_biases (self, mini_batch, step_size, lmbda, training_set_size, regularization_type=None):
-        grad_b = [[0 for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
-        grad_w = [[[0 for p in range(self.__layer_sizes[l-1])]
-                   for n in range(self.__layer_sizes[l])] for l in range(1, self.__n_layers)]
+        grad_b = [np.zeros(l) for l in self.__layer_sizes[1:]]
+        grad_w = [np.zeros((cl, pl)) for pl, cl in zip(self.__layer_sizes[:self.__n_layers-1], self.__layer_sizes[1:])]
 
         for i, o in mini_batch:
             d_grad_b, d_grad_w = self.__back_prop(i, o)
-            grad_b = [Functions.add_vec(1, 1, grad_b[a], d_grad_b[a]) for a in range(self.__n_layers-1)]
-            grad_w = [[Functions.add_vec(1, 1, grad_w[a-1][b], d_grad_w[a-1][b])
-                       for b in range(self.__layer_sizes[a])] for a in range(1, self.__n_layers)]
+            grad_b = [gb + dgb for gb, dgb in zip(grad_b, d_grad_b)]
+            grad_w = [gw + dgw for gw, dgw in zip(grad_w, d_grad_w)]
 
         avg_step = (step_size+0.0)/len(mini_batch)
 
-        self.__biases = [Functions.add_vec(1, -avg_step, self.__biases[a], grad_b[a]) for a in
-                         range(self.__n_layers - 1)]
+        self.__biases = [b - avg_step*gb for b, gb in zip(self.__biases, grad_b)]
 
         if regularization_type == 'L1':
             #L1 Regularization
-            self.__weights = [[Functions.add_vec(1, -avg_step, self.__weights[a][b], grad_w[a][b])
-                               for b in range(self.__layer_sizes[a + 1])] for a in range(self.__n_layers - 1)]
+            self.__weights = [w - avg_step*gw for w, gw in zip(self.__weights, grad_w)]
 
             reg = lmbda/training_set_size
             for x in range(len(self.__weights)):
@@ -126,12 +93,10 @@ class Net:
         elif regularization_type == 'L2':
             #L2 Regularization
             reg = lmbda/training_set_size
-            self.__weights = [[Functions.add_vec((1-(step_size*reg)), -avg_step, self.__weights[a][b], grad_w[a][b])
-                               for b in range(self.__layer_sizes[a+1])] for a in range(self.__n_layers-1)]
+            self.__weights = [(1-step_size*reg)*w-step_size*gw for w, gw in zip (self.__weights, grad_w)]
         else:
             # Unregularized
-            self.__weights = [[Functions.add_vec(1, -avg_step, self.__weights[a][b], grad_w[a][b])
-                               for b in range(self.__layer_sizes[a + 1])] for a in range(self.__n_layers - 1)]
+            self.__weights = [w-avg_step*gw for w, gw in zip(self.__weights, grad_w)]
 
     # Returns fraction correct by testing it against the neural net
     def evaluate(self, test_data):
@@ -144,8 +109,8 @@ class Net:
             expected[a] = test_data[a][1]
         results = []
 
-        for _ in range(n_tests):
-            results.append(self.feed_forward(tests[_]))
+        for t in range(n_tests):
+            results.append(self.feed_forward(tests[t]))
         correct = 0.0
 
         for t in range(n_tests):
