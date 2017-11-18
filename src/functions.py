@@ -1,14 +1,5 @@
 import numpy as np
 
-# Returns the Hadamard product between two vectors
-def hadamard_prod (vec_a, vec_b):
-    if not len(vec_a) == len(vec_b):
-        return 0
-    vec = []
-    for a, b in zip(vec_a, vec_b):
-        vec.append(a*b)
-    return vec
-
 # Returns -1 if number is negative, 1 if positive, 0 if 0
 def sign (num):
     if num < 0:

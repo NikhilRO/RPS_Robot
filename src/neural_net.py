@@ -1,4 +1,4 @@
-import Net as neuralnet
+import net as neuralnet
 
 # Pass through 1D array layer_sizes, where first index is size of input and last is size of output
 def new_net (layer_sizes):
