@@ -3,8 +3,8 @@ from PIL import Image, ImageTk
 from itertools import count
 import time
 
+#ImageLabel class for gifs
 class ImageLabel(tk.Label):
-    #Method that plays gifs
     def load(self, img):
         if isinstance(img, str):
             img = Image.open(img)
@@ -32,7 +32,8 @@ class ImageLabel(tk.Label):
     def unload(self):
         self.config(image=None)
         self.frames = None
-
+        
+    #Method that plays the gifs
     def next_frame(self):
         if self.frames:
             self.loc += 1
@@ -44,6 +45,7 @@ class ImageLabel(tk.Label):
             self.after(self.delay, self.next_frame)
         return -1
 
+#Class for the tkinter GUI
 class GUI:
     def __init__(self):
         self.root = tk.Tk()

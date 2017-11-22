@@ -7,6 +7,10 @@ import image_conversion as ic
 import neural_net as nn
 import rps_net as rn
 import net
+import os
+import gui
+
+g = gui.GUI()
 
 c_p = False
 c_t = time.time()
@@ -23,22 +27,21 @@ time.sleep(2)
 prev = 0
 edges = 0
 
-cam.capture('frame.png')
-
-f = cv2.imread('frame.png', 0)
-
-edges = cv2.Canny(f, 120, 130)
-
-height, width = np.shape(edges)
-
 ROCK = 0
 PAPER = 1
 SCISSORS = 2
 
 image = [[0 for x in range(width)] for y in range(height)]
+
+#Sets the neural net's weights and biases to those obtained from training
 net = nn.new_net([0])
-w, b = rn.read_w_b_from_file('weights12.txt')
+w, b = rn.read_w_b_from_file('weights.txt')
 nn.set_network_weights_biases(net, w, b)
+
+#Changes parent directory to that containing the gifs
+os.chdir("..")
+os.chdir("gui images")
+
 for frame in cam.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     arr = []
 
@@ -56,32 +59,37 @@ for frame in cam.capture_continuous(rawCapture, format="bgr", use_video_port=Tru
     image = edges/255
     
     image1, is_play = ic.compress_to_25x25(image)
-    
+
+    #If a count of Rock-Paper-Scissors is played, increment the counter
     if is_play:
         if not c_p:
             cntr += 1
     c_p = is_play
     
     arr = image1.ravel()
-    answer = ROCK
+    
+    #Answer with either rock, paper or scissors on the final count
+    #depending on what beats the human's move
     if cntr%4 == 0:
-        print("ayylmao")
         answer = nn.get_output(net, arr)
         cntr=1
-
         if answer == ROCK:
             print("Rock", cntr)
+            g.show_move('Paper.gif')
         elif answer == PAPER:
             print("Paper", cntr)
+            g.show_move('Scissors.gif')
         elif answer == SCISSORS:
             print("Scissors", cntr)
+            g.show_move("Rock.gif")
     elif not cntr == 1:
         if time.time() - c_t > 4:
             cntr = 1
             c_t = time.time()
+        if is_play:
+            g.show_move("motion.gif")
     else:
         c_t = time.time()
-    print(cntr)
     rawCapture.truncate(0)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break;
