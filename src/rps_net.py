@@ -25,7 +25,7 @@ def write_to_file (net, filename):
             file.write("\n" + str(c))
 
     file.close()
-    return "ayy"
+    return "Success"
 
 def write_data_to_file (arr, filename):
     file = open(filename, 'a')
@@ -34,7 +34,7 @@ def write_data_to_file (arr, filename):
         file.write("\n" + str(x))
     file.write("\n")
     file.close()
-    return "ayyy"
+    return "Success"
 
 def read_w_b_from_file (filename):
     counter = 0

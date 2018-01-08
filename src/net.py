@@ -169,21 +169,21 @@ class Net:
 
     def set_weights_biases (self, weights, biases):
         if not len(weights) == len(biases):
-            return "failed"
+            return "Unable to upload network due to invalid inputs"
         n_layers = len(weights) + 1
         layer_sizes = []
         layer_sizes.append(len(weights[0][0]))
         for w in weights[0]:
             if not len(w) == layer_sizes[0]:
-                return "failed"
+                return "Unable to upload network due to invalid inputs"
         for l, b, n in zip(weights, biases, range(0, n_layers-1)):
             if len(l) == len(b):
                 layer_sizes.append(len(b))
                 for w in l:
                     if not len(w) == layer_sizes[n]:
-                        return "failed"
+                        return "Unable to upload network due to invalid inputs"
             else:
-                return "failed"
+                return "Unable to upload network due to invalid inputs"
         self.__n_layers = n_layers
         self.__weights = weights
         self.__biases = biases
